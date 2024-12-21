@@ -35,7 +35,9 @@
                 <input type="checkbox" id="remember" v-model="rememberMe" />
                 <label for="remember" class="read-text">Remember me</label>
               </span>
-              <button :disabled="!isLoginFormValid">Login</button>
+              <button id="kakao-login-btn" @click="handleKakaoLogin">
+    Login with Kakao
+  </button>
             </form>
             <a
               href="javascript:void(0)"
@@ -198,7 +200,56 @@ export default {
       } else {
         alert("Registration failed.");
       }
+      // 카카오로그인
+      const kakaoInitialized = ref(false);
+
+    onMounted(() => {
+      if (!window.Kakao.isInitialized()) {
+        window.Kakao.init("YOUR_KAKAO_JAVASCRIPT_KEY"); // JavaScript 키로 초기화
+        kakaoInitialized.value = true;
+        console.log("Kakao SDK initialized:", window.Kakao.isInitialized());
+      }
+    });
+
+    const handleKakaoLogin = () => {
+      if (!kakaoInitialized.value) {
+        alert("Kakao SDK is not initialized");
+        return;
+      }
+      //리다이렉트
+      window.Kakao.Auth.authorize({
+    redirectUri: "http://localhost:3000/home",
+  });
     };
+
+    const fetchUserProfile = (accessToken) => {
+      window.Kakao.API.request({
+        url: "/v2/user/me",
+        success: (res) => {
+          console.log("User profile:", res);
+          alert(`Welcome, ${res.properties.nickname}`);
+        },
+        fail: (error) => {
+          console.error("Failed to fetch user profile:", error);
+        },
+      });
+    };
+    const handleKakaoLogout = () => {
+  if (!window.Kakao.Auth.getAccessToken()) {
+    alert("Not logged in");
+    return;
+  }
+
+  window.Kakao.Auth.logout(() => {
+    console.log("Logged out successfully");
+    localStorage.removeItem("kakaoAccessToken");
+    alert("You have been logged out.");
+  });
+};  
+      
+    };
+
+    
 
     return {
       isLoginVisible,
@@ -221,6 +272,7 @@ export default {
       blurInput,
       handleLogin,
       handleRegister,
+      handleKakaoLogin,
     };
   },
 };

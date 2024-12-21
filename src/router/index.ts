@@ -4,6 +4,7 @@ import Home from '@/components/Home.vue';
 import Popular from '@/components/Popular.vue';
 import Search from '@/components/Search.vue';
 import Wishlist from '@/components/Wishlist.vue';
+import CallbackPage from "@/views/CallbackPage.vue";
 
 const routes = [
   {
@@ -31,10 +32,14 @@ const routes = [
     name: 'Wishlist',
     component: Wishlist,
   },
+  { path: "/callback",
+    name: "CallbackPage",
+    component: CallbackPage,
+  },
 ];
 
 const router = createRouter({
-  history: createWebHistory('/WSD2/'),
+  history: createWebHistory('/Kakao-login/'),
   routes,
 });
 
