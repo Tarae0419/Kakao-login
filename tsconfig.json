@@ -1,22 +1,24 @@
 {
   "compilerOptions": {
-    "composite": true,
-    "baseUrl": ".",        // 기본 경로 설정
+    "target": "esnext",
+    "module": "esnext",
+    "strict": true,
+    "jsx": "preserve",
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "useDefineForClassFields": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "types": ["webpack-env", "jest"],
     "paths": {
-      "@/*": ["src/*"]     // @ 경로 별칭 설정
+      "@/*": ["src/*"]
     },
-    "types": ["node"],     // Node.js 타입 선언 추가
-    "module": "ESNext",    // ESNext 모듈 시스템 사용
-    "moduleResolution": "node", // Node 방식으로 모듈 해석
-    "target": "ESNext",    // 최신 JavaScript 버전 타겟
-    "jsx": "preserve",     // Vue의 JSX 지원 설정
-    "esModuleInterop": true, // ES6 모듈 호환성 설정
-    "skipLibCheck": true,  // 라이브러리 체크 건너뜀
-    "strict": true         // 엄격한 타입 검사 활성화
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue", "src/**/*.tsx"],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "tests/**/*.ts", "tests/**/*.tsx"],
+  "exclude": ["node_modules"]
 }

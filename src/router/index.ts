@@ -1,69 +1,41 @@
-import {createRouter, createWebHashHistory} from 'vue-router'
-import SignIn from '@/vue/SignIn.vue';
-import Home from "../vue/home.vue";
+import { createRouter, createWebHistory } from 'vue-router';
+import SignIn from '../components/SignIn.vue';
+import Home from '@/components/Home.vue';
+import Popular from '@/components/Popular.vue';
+import Search from '@/components/Search.vue';
+import Wishlist from '@/components/Wishlist.vue';
 
 const routes = [
-    {
-        path: '/',
-        name: 'Main',
-        component: Home,
-        meta: { requiresAuth: true }, // 인증이 필요한 경우 설정
-        children: [
-            {
-                name: 'HomeMain',
-                component: () => import('@/views/home-main.vue'),
-                path: '/',
-            },
-            {
-                name: 'HomePopular',
-                component: () => import('@/views/home-popular.vue'),
-                path: 'popular',
-            },
-            {
-                name: 'HomeWishList',
-                component: () => import('@/views/home-wishlist.vue'),
-                path: 'wishlist',
-            },
-            {
-                name: 'HomeSearch',
-                component: () => import('@/views/home-search.vue'),
-                path: 'search',
-            }
-        ]
-    },
-    {
-        path: '/signin',
-        name: 'SignIn', // name 추가
-        component: SignIn,
-    },
-]
+  {
+    path: '/',
+    name: 'Home', // 이름 수정
+    component: Home,
+  },
+  {
+    path: '/signin',
+    name: 'SignIn',
+    component: SignIn,
+  },
+  {
+    path: '/popular',
+    name: 'Popular',
+    component: Popular,
+  },
+  {
+    path: '/search',
+    name: 'Search',
+    component: Search,
+  },
+  {
+    path: '/wishlist',
+    name: 'Wishlist',
+    component: Wishlist,
+  },
+];
 
 const router = createRouter({
-    history: createWebHashHistory('/24-02-WSD-Assignment-02-Demo/'),
-    routes
-})
-
-router.beforeEach((to, _from, next): void => {
-    const isAuthenticated = localStorage.getItem('TMDb-Key') !== null;
-
-    if (to.matched.some(record => record.meta.requiresAuth)) {
-        // If the route requires authentication and the user is not authenticated
-        if (!isAuthenticated) {
-            next({ name: 'SignIn' }); // Redirect to the SignIn page
-        } else {
-            next(); // Proceed to the requested route
-        }
-    } else {
-        // If the user is already authenticated and tries to access the SignIn page
-        if (to.name === 'SignIn' && isAuthenticated) {
-            next({ name: '/' }); // Redirect to the home page
-        }
-        else {
-            next(); // Proceed to the requested route
-        }
-    }
+  history: createWebHistory('/WSD2/'),
+  routes,
 });
 
-
-export default router
-
+export default router;
