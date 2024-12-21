@@ -10,11 +10,14 @@ export default {
   methods: {
     handleKakaoLogin() {
       if (!window.Kakao.isInitialized()) {
-        window.Kakao.init("YOUR_KAKAO_JAVASCRIPT_KEY"); // JavaScript 키로 초기화
-        console.log("Kakao SDK initialized");
+        window.Kakao.init(process.env.VUE_APP_KAKAO_JAVASCRIPT_KEY); // JavaScript 키 사용
+        console.log(
+          "Kakao SDK initialized with key:",
+          process.env.VUE_APP_KAKAO_JAVASCRIPT_KEY
+        );
       }
       window.Kakao.Auth.authorize({
-        redirectUri: "http://localhost:3000/callback", // 리다이렉트 URI
+        redirectUri: process.env.VUE_APP_KAKAO_REDIRECT_URI,
       });
     },
   },
