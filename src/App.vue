@@ -9,7 +9,14 @@
           <router-link to="/search" class="nav-link">Search</router-link>
           <router-link to="/wishlist" class="nav-link">Wishlist</router-link>
         </div>
-        <button class="icon-button" @click="goToSignIn">
+        <!-- 사용자 정보 표시 -->
+        <div class="user-info" v-if="user">
+          <span class="user-nickname">{{
+            user.kakao_account.profile.nickname
+          }}</span>
+          <button class="icon-button" @click="logout">Logout</button>
+        </div>
+        <button class="icon-button" v-else @click="goToSignIn">
           <i class="icon-user"></i>
         </button>
       </nav>
@@ -22,6 +29,11 @@
 <script>
 export default {
   name: "App",
+  data() {
+    return {
+      user: null, // 카카오 사용자 정보
+    };
+  },
   computed: {
     // 현재 경로가 /signin이거나 하위 경로일 경우 네비게이션 바 숨김
     isSignInPage() {
@@ -32,6 +44,21 @@ export default {
     goToSignIn() {
       this.$router.push("/signin"); // SignIn 페이지로 이동
     },
+    logout() {
+      // 로컬 스토리지에서 사용자 정보 및 토큰 제거
+      localStorage.removeItem("kakao_user");
+      localStorage.removeItem("kakao_access_token");
+      this.user = null; // 사용자 상태 초기화
+      this.$router.push("/signin"); // 로그인 페이지로 리다이렉트
+      alert("Logged out successfully.");
+    },
+  },
+  mounted() {
+    // 로컬 스토리지에서 사용자 정보 로드
+    const savedUser = localStorage.getItem("kakao_user");
+    if (savedUser) {
+      this.user = JSON.parse(savedUser);
+    }
   },
 };
 </script>
@@ -73,11 +100,22 @@ nav {
   color: #ffd700; /* 링크에 호버 효과 */
 }
 
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-nickname {
+  color: white;
+  font-size: 18px;
+}
+
 .icon-button {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 24px;
+  font-size: 16px;
   color: white;
   transition: transform 0.2s ease;
 }
