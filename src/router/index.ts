@@ -33,13 +33,14 @@ const routes = [
     component: Wishlist,
   },
   {
-    path: '/callback',
+    path: '/Kakao-login/callback',
+    name: 'Callback',
     component: KakaoCallback,
   },
 ];
 
 const router = createRouter({
-  history: createWebHistory('/Kakao-login/'),
+  history: createWebHistory(),
   routes,
 });
 

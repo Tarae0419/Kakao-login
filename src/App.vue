@@ -9,16 +9,19 @@
           <router-link to="/search" class="nav-link">Search</router-link>
           <router-link to="/wishlist" class="nav-link">Wishlist</router-link>
         </div>
-        <!-- 사용자 정보 표시 -->
-        <div class="user-info" v-if="user">
-          <span class="user-nickname">{{
-            user.kakao_account.profile.nickname
-          }}</span>
-          <button class="icon-button" @click="logout">Logout</button>
+        <!-- 사용자 정보 및 로그인 상태 -->
+        <div class="user-info">
+          <template v-if="isLoggedIn">
+            <span class="user-nickname">
+              Logged in as:
+              {{ user.kakao_account?.profile?.nickname || "User" }}
+            </span>
+            <button class="icon-button" @click="logout">Logout</button>
+          </template>
+          <template v-else>
+            <button class="icon-button" @click="goToSignIn">Login</button>
+          </template>
         </div>
-        <button class="icon-button" v-else @click="goToSignIn">
-          <i class="icon-user"></i>
-        </button>
       </nav>
     </header>
     <!-- 라우터 뷰 -->
@@ -35,21 +38,25 @@ export default {
     };
   },
   computed: {
-    // 현재 경로가 /signin이거나 하위 경로일 경우 네비게이션 바 숨김
+    // 현재 경로가 /signin인 경우 네비게이션 바 숨김
     isSignInPage() {
       return this.$route.path.startsWith("/signin");
+    },
+    // 로그인 여부 확인
+    isLoggedIn() {
+      return this.user !== null;
     },
   },
   methods: {
     goToSignIn() {
-      this.$router.push("/signin"); // SignIn 페이지로 이동
+      this.$router.push("/signin");
     },
     logout() {
       // 로컬 스토리지에서 사용자 정보 및 토큰 제거
       localStorage.removeItem("kakao_user");
       localStorage.removeItem("kakao_access_token");
-      this.user = null; // 사용자 상태 초기화
-      this.$router.push("/signin"); // 로그인 페이지로 리다이렉트
+      this.user = null;
+      this.$router.push("/signin");
       alert("Logged out successfully.");
     },
   },
@@ -77,9 +84,9 @@ nav {
 }
 
 .nav-links {
-  flex-grow: 1; /* 중앙 정렬을 위해 공간 확보 */
+  flex-grow: 1;
   display: flex;
-  justify-content: center; /* 링크를 가운데 정렬 */
+  justify-content: center;
   gap: 20px;
 }
 
@@ -93,11 +100,11 @@ nav {
 .nav-link.router-link-active {
   font-weight: bold;
   text-decoration: underline;
-  color: #ffd700; /* 강조된 색상 */
+  color: #ffd700;
 }
 
 .nav-link:hover {
-  color: #ffd700; /* 링크에 호버 효과 */
+  color: #ffd700;
 }
 
 .user-info {
@@ -121,7 +128,7 @@ nav {
 }
 
 .icon-button:hover {
-  transform: scale(1.1); /* 버튼 호버 효과 */
+  transform: scale(1.1);
 }
 
 .icon-user {

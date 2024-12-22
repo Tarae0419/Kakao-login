@@ -1,12 +1,14 @@
 <template>
   <div>
-    <p v-if="errorMessage" class="error">Error: {{ errorMessage }}</p>
-    <p v-else-if="loading" class="loading">Logging in, please wait...</p>
-    <p v-else class="success">Welcome, {{ userName }}!</p>
+    <p v-if="errorMessage">Error: {{ errorMessage }}</p>
+    <p v-else-if="loading">Processing login...</p>
+    <p v-else>Welcome, {{ userName }}!</p>
   </div>
 </template>
 
 <script>
+import { useToast } from "vue-toastification";
+
 export default {
   name: "KakaoCallback",
   data() {
@@ -16,29 +18,28 @@ export default {
       userName: null,
     };
   },
+  setup() {
+    const toast = useToast();
+    return { toast };
+  },
   mounted() {
     const code = new URLSearchParams(window.location.search).get("code");
     if (!code) {
-      this.handleError("Authorization code not found.");
+      this.errorMessage = "Authorization code not found.";
+      this.loading = false;
+      this.toast.error("Authorization code가 없습니다.");
       return;
     }
 
-    // 카카오 토큰 요청
-    this.fetchToken(code)
-      .then((accessToken) => this.fetchUserInfo(accessToken))
-      .then((user) => {
-        this.userName = user.kakao_account.profile.nickname;
-        localStorage.setItem("kakao_user", JSON.stringify(user));
-        this.loading = false;
-        console.log("User Info:", user);
-        this.$router.push("/"); // 메인 페이지로 이동
-      })
-      .catch((err) => {
-        this.handleError(err.message || "Login failed.");
-      });
+    if (!window.Kakao.isInitialized()) {
+      window.Kakao.init(process.env.VUE_APP_KAKAO_JAVASCRIPT_KEY);
+      console.log("Kakao SDK initialized");
+    }
+
+    this.handleKakaoLogin(code);
   },
   methods: {
-    async fetchToken(code) {
+    async handleKakaoLogin(code) {
       try {
         const response = await fetch("https://kauth.kakao.com/oauth/token", {
           method: "POST",
@@ -47,59 +48,67 @@ export default {
           },
           body: new URLSearchParams({
             grant_type: "authorization_code",
-            client_id: process.env.VUE_APP_KAKAO_REST_API_KEY,
+            client_id: process.env.VUE_APP_KAKAO_JAVASCRIPT_KEY,
             redirect_uri: process.env.VUE_APP_KAKAO_REDIRECT_URI,
             code,
           }),
         });
+
         const data = await response.json();
+
+        // 에러 응답 처리
         if (data.error) {
-          throw new Error(data.error_description || "Failed to fetch token.");
+          throw new Error(data.error_description || "Token error");
         }
-        localStorage.setItem("kakao_access_token", data.access_token);
-        return data.access_token;
+
+        // 액세스 토큰 설정
+        window.Kakao.Auth.setAccessToken(data.access_token);
+        console.log("Access Token Set:", data.access_token);
+
+        // 사용자 정보 요청
+        this.fetchUserInfo();
       } catch (err) {
-        throw new Error(`Token fetch error: ${err.message}`);
+        console.error("Token Request Error:", err);
+        this.toast.error("로그인 실패: 다시 시도해주세요.");
+        this.errorMessage = "Login failed. Please try again.";
+        this.loading = false;
       }
     },
-    async fetchUserInfo(accessToken) {
-      try {
-        const response = await fetch("https://kapi.kakao.com/v2/user/me", {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        const user = await response.json();
-        if (!user) {
-          throw new Error("Failed to fetch user info.");
-        }
-        return user;
-      } catch (err) {
-        throw new Error(`User info fetch error: ${err.message}`);
-      }
-    },
-    handleError(message) {
-      this.errorMessage = message;
-      this.loading = false;
-      console.error(message);
+    fetchUserInfo() {
+      window.Kakao.API.request({
+        url: "/v2/user/me",
+        success: (response) => {
+          console.log("User Info Response:", response);
+
+          // 데이터 유효성 검사
+          if (
+            response.kakao_account &&
+            response.kakao_account.profile &&
+            response.kakao_account.profile.nickname
+          ) {
+            this.userName = response.kakao_account.profile.nickname;
+            this.toast.success(`Welcome, ${this.userName}!`);
+
+            // 로컬 스토리지에 사용자 정보 저장
+            localStorage.setItem("kakao_user", JSON.stringify(response));
+
+            console.log("Redirecting to Home...");
+            this.$router.push("/");
+          } else {
+            console.error("User profile data is not available.");
+            this.errorMessage = "Profile information is missing.";
+            this.toast.error("사용자 프로필 정보를 가져오지 못했습니다.");
+            this.loading = false;
+          }
+        },
+        fail: (error) => {
+          console.error("Failed to fetch user info:", error);
+          this.toast.error("사용자 정보를 가져오는 데 실패했습니다.");
+          this.errorMessage = "Failed to fetch user info.";
+          this.loading = false;
+        },
+      });
     },
   },
 };
 </script>
-
-<style scoped>
-.error {
-  color: red;
-  font-weight: bold;
-}
-
-.loading {
-  color: blue;
-  font-weight: bold;
-}
-
-.success {
-  color: green;
-  font-weight: bold;
-}
-</style>
