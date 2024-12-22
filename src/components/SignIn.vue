@@ -1,13 +1,13 @@
 <template>
   <div class="login-container">
     <!-- 별 애니메이션 -->
-    <div class="stars"></div>
-    <div class="stars-2"></div>
-    <div class="stars-3"></div>
+    <div class="star-field">
+      <div class="star" v-for="n in 50" :key="n"></div>
+    </div>
 
     <div class="login-box">
       <h1 class="login-title">카카오 소셜 로그인</h1>
-      <p class="login-description">우주의 무한함 속으로 로그인하세요!</p>
+      <p class="login-description">카카오 계정으로 로그인하세요.</p>
       <!-- 카카오 로그인 이미지 버튼 -->
       <img
         :src="kakaoButtonImage"
@@ -69,73 +69,60 @@ export default {
 </script>
 
 <style>
-/* 우주 배경 스타일 */
+/* 어두운 배경과 별 효과 */
 .login-container {
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: linear-gradient(
-    to bottom,
-    #020024,
-    #090979,
-    #4b0082
-  ); /* 우주 느낌의 그라데이션 */
+  background-color: #000; /* 완전한 어두운 배경 */
   overflow: hidden;
   font-family: Arial, sans-serif;
 }
 
-/* 별 애니메이션 */
-.stars,
-.stars-2,
-.stars-3 {
+/* 별 필드 */
+.star-field {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 200%;
-  height: 200%;
-  background-repeat: repeat;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  animation: move-stars 50s linear infinite;
 }
 
-.stars {
-  background-image: radial-gradient(white, rgba(255, 255, 255, 0) 70%);
-  opacity: 0.7;
+.star {
+  position: absolute;
+  width: 3px; /* 별 크기 조정 */
+  height: 3px;
+  background-color: white; /* 밝은 색상 */
+  border-radius: 50%;
+  top: calc(100% * var(--random-y, 0.5));
+  left: calc(100% * var(--random-x, 0.5));
+  animation: twinkle 2s infinite ease-in-out alternate;
 }
 
-.stars-2 {
-  background-image: radial-gradient(#f5f3ce, rgba(255, 255, 255, 0) 70%);
-  opacity: 0.5;
-  animation-duration: 100s;
-}
-
-.stars-3 {
-  background-image: radial-gradient(#fdc08e, rgba(255, 255, 255, 0) 70%);
-  opacity: 0.3;
-  animation-duration: 150s;
-}
-
-@keyframes move-stars {
-  from {
-    transform: translateX(0) translateY(0);
+/* 반짝이는 효과 */
+@keyframes twinkle {
+  0% {
+    opacity: 0.2;
+    transform: scale(0.8);
   }
-  to {
-    transform: translateX(-100%) translateY(-100%);
+  100% {
+    opacity: 1;
+    transform: scale(1.4);
   }
 }
 
 /* 로그인 박스 스타일 */
 .login-box {
   text-align: center;
-  background-color: rgba(0, 0, 0, 0.8); /* 어두운 반투명 배경 */
+  background-color: rgba(50, 50, 50, 0.9); /* 더 밝은 반투명 박스 */
   padding: 40px;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  border: 2px solid #f7e317; /* 테두리 추가 */
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2); /* 밝은 그림자 */
   max-width: 400px;
   width: 100%;
-  color: #fff; /* 흰색 텍스트 */
+  color: #fff;
   z-index: 1;
 }
 
@@ -150,7 +137,7 @@ export default {
 /* 설명 텍스트 스타일 */
 .login-description {
   font-size: 16px;
-  color: #ddd; /* 연한 회색 */
+  color: #ddd;
   margin-bottom: 30px;
 }
 
