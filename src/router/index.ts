@@ -9,7 +9,7 @@ import KakaoCallback from '@/components/Callback.vue';
 const routes = [
   {
     path: '/',
-    name: 'Home', // 이름 수정
+    name: 'Home',
     component: Home,
   },
   {
