@@ -1,5 +1,5 @@
 const { defineConfig } = require("@vue/cli-service");
 
-module.exports = {
-  publicPath: "/Kakao-login/",
-};
+module.exports = defineConfig({
+  publicPath: process.env.NODE_ENV === "production" ? "/Kakao-login/" : "/",
+});

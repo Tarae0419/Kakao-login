@@ -1,3 +1,11 @@
+<template>
+  <div>
+    <p v-if="errorMessage">Error: {{ errorMessage }}</p>
+    <p v-else-if="loading">Processing login...</p>
+    <p v-else>Welcome, {{ userName }}!</p>
+  </div>
+</template>
+
 <script>
 import { useToast } from "vue-toastification";
 
@@ -19,7 +27,9 @@ export default {
     if (!code) {
       this.errorMessage = "Authorization code not found.";
       this.loading = false;
-      this.toast.error("Authorization code가 없습니다.");
+      this.toast.error(
+        "로그인을 위한 인증 코드가 없습니다. 다시 시도해주세요."
+      );
       return;
     }
 
@@ -46,6 +56,10 @@ export default {
           }),
         });
 
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
 
         if (data.error) {
@@ -57,9 +71,22 @@ export default {
 
         this.fetchUserInfo();
       } catch (err) {
+        // 네트워크 오류 또는 HTTP 상태 코드에 따른 처리
         console.error("Token Request Error:", err);
-        this.toast.error("로그인 실패: 다시 시도해주세요.");
-        this.errorMessage = "Login failed. Please try again.";
+        if (err.message.includes("Failed to fetch")) {
+          this.toast.error("네트워크 오류: 인터넷 연결을 확인해주세요.");
+        } else if (err.message.includes("HTTP error")) {
+          this.toast.error(`서버 오류 발생: ${err.message}`);
+        } else if (err.message.includes("invalid_grant")) {
+          this.toast.error(
+            "유효하지 않은 인증 코드입니다. 다시 로그인해주세요."
+          );
+        } else {
+          this.toast.error(
+            "로그인 요청 중 문제가 발생했습니다. 다시 시도해주세요."
+          );
+        }
+        this.errorMessage = "Login failed due to a network or server error.";
         this.loading = false;
       }
     },

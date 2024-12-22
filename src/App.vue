@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-    <!-- 네비게이션 바 -->
     <header v-if="!isSignInPage">
       <nav>
         <div class="nav-links">
@@ -11,14 +10,12 @@
         </div>
         <div class="user-info">
           <template v-if="user">
-            <!-- 프로필 이미지 -->
             <img
               v-if="user.kakao_account?.profile?.profile_image_url"
               :src="user.kakao_account.profile.profile_image_url"
               alt="Profile Image"
               class="profile-image"
             />
-            <!-- 이름 -->
             <span class="user-nickname">
               {{ user.kakao_account?.profile?.nickname || "User" }}
             </span>
@@ -30,7 +27,6 @@
         </div>
       </nav>
     </header>
-    <!-- 라우터 뷰 -->
     <router-view @login-success="updateUser" />
   </div>
 </template>
