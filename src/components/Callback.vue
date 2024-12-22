@@ -1,11 +1,3 @@
-<template>
-  <div>
-    <p v-if="errorMessage">Error: {{ errorMessage }}</p>
-    <p v-else-if="loading">Processing login...</p>
-    <p v-else>Welcome, {{ userName }}!</p>
-  </div>
-</template>
-
 <script>
 import { useToast } from "vue-toastification";
 
@@ -56,16 +48,13 @@ export default {
 
         const data = await response.json();
 
-        // 에러 응답 처리
         if (data.error) {
           throw new Error(data.error_description || "Token error");
         }
 
-        // 액세스 토큰 설정
         window.Kakao.Auth.setAccessToken(data.access_token);
         console.log("Access Token Set:", data.access_token);
 
-        // 사용자 정보 요청
         this.fetchUserInfo();
       } catch (err) {
         console.error("Token Request Error:", err);
@@ -80,20 +69,22 @@ export default {
         success: (response) => {
           console.log("User Info Response:", response);
 
-          // 데이터 유효성 검사
           if (
             response.kakao_account &&
             response.kakao_account.profile &&
             response.kakao_account.profile.nickname
           ) {
             this.userName = response.kakao_account.profile.nickname;
-            this.toast.success(`Welcome, ${this.userName}!`);
 
             // 로컬 스토리지에 사용자 정보 저장
             localStorage.setItem("kakao_user", JSON.stringify(response));
 
-            console.log("Redirecting to Home...");
+            // 부모 컴포넌트에 사용자 정보 전달
+            this.$emit("login-success", response);
+
+            // 홈으로 이동
             this.$router.push("/");
+            this.toast.success(`Welcome, ${this.userName}!`);
           } else {
             console.error("User profile data is not available.");
             this.errorMessage = "Profile information is missing.";

@@ -9,11 +9,17 @@
           <router-link to="/search" class="nav-link">Search</router-link>
           <router-link to="/wishlist" class="nav-link">Wishlist</router-link>
         </div>
-        <!-- 사용자 정보 및 로그인 상태 -->
         <div class="user-info">
-          <template v-if="isLoggedIn">
+          <template v-if="user">
+            <!-- 프로필 이미지 -->
+            <img
+              v-if="user.kakao_account?.profile?.profile_image_url"
+              :src="user.kakao_account.profile.profile_image_url"
+              alt="Profile Image"
+              class="profile-image"
+            />
+            <!-- 이름 -->
             <span class="user-nickname">
-              Logged in as:
               {{ user.kakao_account?.profile?.nickname || "User" }}
             </span>
             <button class="icon-button" @click="logout">Logout</button>
@@ -25,7 +31,7 @@
       </nav>
     </header>
     <!-- 라우터 뷰 -->
-    <router-view />
+    <router-view @login-success="updateUser" />
   </div>
 </template>
 
@@ -34,17 +40,12 @@ export default {
   name: "App",
   data() {
     return {
-      user: null, // 카카오 사용자 정보
+      user: null, // 로그인된 사용자 정보
     };
   },
   computed: {
-    // 현재 경로가 /signin인 경우 네비게이션 바 숨김
     isSignInPage() {
       return this.$route.path.startsWith("/signin");
-    },
-    // 로그인 여부 확인
-    isLoggedIn() {
-      return this.user !== null;
     },
   },
   methods: {
@@ -52,16 +53,17 @@ export default {
       this.$router.push("/signin");
     },
     logout() {
-      // 로컬 스토리지에서 사용자 정보 및 토큰 제거
       localStorage.removeItem("kakao_user");
       localStorage.removeItem("kakao_access_token");
       this.user = null;
-      this.$router.push("/signin");
+      this.$router.push("/");
       alert("Logged out successfully.");
+    },
+    updateUser(user) {
+      this.user = user; // 로그인 성공 시 사용자 정보 업데이트
     },
   },
   mounted() {
-    // 로컬 스토리지에서 사용자 정보 로드
     const savedUser = localStorage.getItem("kakao_user");
     if (savedUser) {
       this.user = JSON.parse(savedUser);
@@ -79,14 +81,12 @@ header {
 
 nav {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* 양쪽 정렬 */
   align-items: center;
 }
 
 .nav-links {
-  flex-grow: 1;
   display: flex;
-  justify-content: center;
   gap: 20px;
 }
 
@@ -94,23 +94,13 @@ nav {
   color: white;
   text-decoration: none;
   font-size: 20px;
-  transition: color 0.2s ease;
-}
-
-.nav-link.router-link-active {
-  font-weight: bold;
-  text-decoration: underline;
-  color: #ffd700;
-}
-
-.nav-link:hover {
-  color: #ffd700;
 }
 
 .user-info {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-left: auto; /* 오른쪽 끝으로 이동 */
 }
 
 .user-nickname {
@@ -118,22 +108,17 @@ nav {
   font-size: 18px;
 }
 
+.profile-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 .icon-button {
   background: none;
   border: none;
-  cursor: pointer;
-  font-size: 16px;
   color: white;
-  transition: transform 0.2s ease;
-}
-
-.icon-button:hover {
-  transform: scale(1.1);
-}
-
-.icon-user {
-  content: url("https://cdn-icons-png.flaticon.com/512/847/847969.png");
-  width: 32px;
-  height: 32px;
+  cursor: pointer;
 }
 </style>
