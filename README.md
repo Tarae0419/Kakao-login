@@ -30,6 +30,10 @@
 4. 자동 배포
     - **gh-pages 패키지**
 
-## 프로젝트 구조
+## 실행방법
+
+1. npm install
+
+2. npm run serve(localhost:8080으로 설정)
 
 
